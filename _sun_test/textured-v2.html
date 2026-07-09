@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Into Action Group — Sun</title>
+<style>
+  html,body { margin:0; height:100%; background:#06121f; }
+  body { display:flex; align-items:center; justify-content:center; }
+  .frame { width:390px; height:760px; margin:0 auto; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, #0B1E36 0%, #0A1B31 38%, #0F2A47 72%, #18406A 100%); }
+
+  /* The whole sun lives in ONE container — this is what later animates (translate+scale+opacity). */
+  .sun {
+    position:absolute;
+    left:50%;
+    top:45%;
+    width:320px;
+    height:320px;
+    transform:translate(-50%,-50%);
+    will-change:transform,opacity;
+  }
+  .sun svg { display:block; width:100%; height:100%; overflow:visible; }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="sun">
+      <!-- viewBox gives the corona + base pillar room while keeping every filter region small. -->
+      <svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" aria-label="Glowing sun">
+        <defs>
+          <!-- Soft, wide corona bloom -->
+          <radialGradient id="corona" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#FFD884" stop-opacity="0.50"/>
+            <stop offset="24%"  stop-color="#F6B83F" stop-opacity="0.30"/>
+            <stop offset="48%"  stop-color="#E0A93C" stop-opacity="0.14"/>
+            <stop offset="72%"  stop-color="#E0A93C" stop-opacity="0.045"/>
+            <stop offset="100%" stop-color="#E0A93C" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Clean luminous rim hugging the disc edge -->
+          <radialGradient id="rimGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#FFF1CF" stop-opacity="0"/>
+            <stop offset="62%"  stop-color="#FFF1CF" stop-opacity="0"/>
+            <stop offset="82%"  stop-color="#FFE7AE" stop-opacity="0.50"/>
+            <stop offset="93%"  stop-color="#F6B83F" stop-opacity="0.32"/>
+            <stop offset="100%" stop-color="#E0A93C" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Disc body: white-hot core -> cream -> warm gold, lit slightly high-left -->
+          <radialGradient id="disc" cx="46%" cy="41%" r="64%">
+            <stop offset="0%"   stop-color="#FFFEF9"/>
+            <stop offset="15%"  stop-color="#FFF8E6"/>
+            <stop offset="35%"  stop-color="#FFF1CF"/>
+            <stop offset="60%"  stop-color="#FFD884"/>
+            <stop offset="83%"  stop-color="#F6B83F"/>
+            <stop offset="100%" stop-color="#E0A93C"/>
+          </radialGradient>
+
+          <!-- Concentrated white-hot core -->
+          <radialGradient id="core" cx="46%" cy="41%" r="33%">
+            <stop offset="0%"   stop-color="#FFFEF9" stop-opacity="0.98"/>
+            <stop offset="42%"  stop-color="#FFF8E6" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#FFF1CF" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Restrained vertical light scatter at the base -->
+          <linearGradient id="pillar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#FFE7AE" stop-opacity="0"/>
+            <stop offset="16%"  stop-color="#FFE7AE" stop-opacity="0.16"/>
+            <stop offset="55%"  stop-color="#F6B83F" stop-opacity="0.085"/>
+            <stop offset="100%" stop-color="#E0A93C" stop-opacity="0"/>
+          </linearGradient>
+
+          <!-- GENTLE warm surface texture.
+               Low baseFrequency + 2 octaves = soft large-scale undulation, not cloudy noise.
+               Output is WARM LIGHT (cream) only — no dark blotches — so it reads as luminous
+               variation, never grime/smoke. Clipped to the disc; small filter region. -->
+          <filter id="surface" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.013 0.017" numOctaves="2"
+                          seed="6" stitchTiles="stitch" result="noise"/>
+            <!-- Map noise luminance into a soft alpha, then tint it cream so the texture only
+                 ever ADDS gentle warm light. -->
+            <feColorMatrix in="noise" type="matrix"
+              values="0 0 0 0 1
+                      0 0 0 0 0.94
+                      0 0 0 0 0.81
+                      0 0 0 0.65 0" result="tinted"/>
+            <feGaussianBlur in="tinted" stdDeviation="0.9"/>
+          </filter>
+
+          <!-- Whisper displacement so the disc gradient isn't plasticky; edge stays round. -->
+          <filter id="warp" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2"
+                          seed="11" stitchTiles="stitch" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4"
+                               xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+
+          <clipPath id="discClip">
+            <circle cx="160" cy="160" r="90"/>
+          </clipPath>
+        </defs>
+
+        <!-- 1. Outer corona bloom -->
+        <circle cx="160" cy="160" r="158" fill="url(#corona)"/>
+
+        <!-- 2. Restrained base light pillar -->
+        <rect x="132" y="160" width="56" height="158" fill="url(#pillar)" rx="28"/>
+
+        <!-- 3. The disc — round, luminous, faintly warped -->
+        <g filter="url(#warp)">
+          <circle cx="160" cy="160" r="90" fill="url(#disc)"/>
+        </g>
+
+        <!-- 4. Whisper-thin warm surface texture (additive warm light only), clipped to disc -->
+        <g clip-path="url(#discClip)" opacity="0.5" style="mix-blend-mode:screen">
+          <rect x="68" y="68" width="184" height="184" filter="url(#surface)"/>
+        </g>
+
+        <!-- 5. White-hot core on top -->
+        <circle cx="160" cy="160" r="90" fill="url(#core)"/>
+
+        <!-- 6. Clean luminous rim to re-seal the edge -->
+        <circle cx="160" cy="160" r="96" fill="url(#rimGlow)"/>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

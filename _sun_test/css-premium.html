@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Into Action Group — Sun</title>
+<style>
+  body { margin:0; }
+  .frame {
+    width:390px; height:760px; margin:0 auto; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, #0B1E36 0%, #0A1B31 38%, #0F2A47 72%, #18406A 100%);
+  }
+
+  /* The whole sun system — centered at the frame's optical center.
+     Designed so the .sun element can later be transformed as one unit
+     (translateY up + scale + brighten) for the "rising" animation.
+     No rise animation is applied here; this is the resting risen state. */
+  .sun {
+    position:absolute; left:50%; top:45%; width:0; height:0;
+    transform: translate(-50%,-50%); will-change: transform, opacity;
+  }
+  .sun > * {
+    position:absolute; left:0; top:0; transform: translate(-50%,-50%);
+    border-radius:50%; pointer-events:none;
+  }
+
+  /* Vertical light pillar — soft warm column, the reflection-over-water cue.
+     Low opacity, heavily blurred, elongated; gives the halo gentle asymmetry. */
+  .pillar {
+    width:150px; height:620px; border-radius:50%;
+    background: linear-gradient(180deg,
+        rgba(255,210,140,0.0) 0%,
+        rgba(255,214,150,0.10) 30%,
+        rgba(255,222,160,0.16) 50%,
+        rgba(255,214,150,0.10) 70%,
+        rgba(255,210,140,0.0) 100%);
+    filter: blur(26px); mix-blend-mode: screen;
+  }
+
+  /* Outermost atmospheric scatter — warms the sky, perfectly radial,
+     fades cleanly to navy with no muddy band. */
+  .atmosphere {
+    width:720px; height:720px;
+    background: radial-gradient(circle at 50% 50%,
+        rgba(255,196,100,0.22) 0%,
+        rgba(244,162,66,0.13) 26%,
+        rgba(230,140,70,0.045) 48%,
+        rgba(11,30,54,0.0) 68%);
+    filter: blur(18px); mix-blend-mode: screen;
+  }
+
+  /* Soft diffuse shafts — irregular blurred ELLIPTICAL gradients, never conic.
+     A handful of gentle, varied light smears masked to a ring so they emanate
+     from the disc as scattered light, not as uniform spokes. */
+  .shafts {
+    width:540px; height:540px; opacity:0.85;
+    background:
+      radial-gradient(34% 12% at 50% 50%, rgba(255,228,168,0.20), rgba(255,228,168,0) 70%),
+      radial-gradient(12% 36% at 50% 50%, rgba(255,224,160,0.16), rgba(255,224,160,0) 72%),
+      radial-gradient(30% 14% at 62% 38%, rgba(255,230,175,0.14), rgba(255,230,175,0) 70%),
+      radial-gradient(16% 30% at 40% 64%, rgba(255,222,158,0.12), rgba(255,222,158,0) 72%),
+      radial-gradient(26% 13% at 36% 40%, rgba(255,226,165,0.11), rgba(255,226,165,0) 70%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%,
+        rgba(0,0,0,0) 16%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 80%);
+            mask-image: radial-gradient(circle at 50% 50%,
+        rgba(0,0,0,0) 16%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 80%);
+    filter: blur(13px); mix-blend-mode: screen;
+  }
+
+  /* Outer molten bloom — gold → warm amber, kept warm all the way out
+     so the falloff never desaturates to grey. */
+  .bloom-outer {
+    width:400px; height:400px;
+    background: radial-gradient(circle at 50% 50%,
+        rgba(255,190,72,0.58) 0%,
+        rgba(236,152,58,0.42) 30%,
+        rgba(220,128,52,0.18) 55%,
+        rgba(210,116,48,0.0) 78%);
+    filter: blur(16px); mix-blend-mode: screen;
+  }
+
+  /* Inner warm bloom — gold → cream, wraps the disc edge with no seam. */
+  .bloom-inner {
+    width:250px; height:250px;
+    background: radial-gradient(circle at 50% 50%,
+        rgba(255,243,213,0.92) 0%,
+        rgba(255,218,138,0.82) 34%,
+        rgba(248,188,66,0.5) 60%,
+        rgba(228,146,58,0.0) 84%);
+    filter: blur(9px); mix-blend-mode: screen;
+  }
+
+  /* The disc — white-hot core → cream → gold → amber rim,
+     feathered by a tiny blur so it melts into the bloom (no vector edge). */
+  .disc {
+    width:152px; height:152px;
+    background: radial-gradient(circle at 50% 46%,
+        #FFFEF9 0%,
+        #FFF8E8 16%,
+        #FFF1CF 32%,
+        #FFD884 55%,
+        #F6B83F 78%,
+        #E0A93C 100%);
+    filter: blur(1.4px);
+  }
+
+  /* Crisp inner core highlight — anchors the eye, sits just above center. */
+  .core {
+    width:70px; height:70px; top:-4px;
+    background: radial-gradient(circle at 50% 50%,
+        rgba(255,255,251,0.95) 0%,
+        rgba(255,251,238,0.55) 48%,
+        rgba(255,248,228,0.0) 76%);
+    filter: blur(3px); mix-blend-mode: screen;
+  }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="sun">
+      <div class="pillar"></div>
+      <div class="atmosphere"></div>
+      <div class="shafts"></div>
+      <div class="bloom-outer"></div>
+      <div class="bloom-inner"></div>
+      <div class="disc"></div>
+      <div class="core"></div>
+    </div>
+  </div>
+</body>
+</html>

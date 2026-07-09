@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Into Action — sunrise</title>
+<style>
+  body { margin:0; background:#06101f; }
+  .frame {
+    width:390px; height:760px; margin:0 auto; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, #0B1E36 0%, #0A1B31 38%, #0F2A47 72%, #18406A 100%);
+  }
+  /* Whole sun lives in one transformable group; optical center at 45% from top. */
+  .sun-stage { position:absolute; left:50%; top:45%; width:0; height:0; transform:translate(-50%,-50%); }
+  .sun-svg   { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:block; }
+  /* Faint light pillar rising from the sun. */
+  .pillar {
+    position:absolute; left:50%; top:45%; transform:translateX(-50%);
+    width:110px; height:330px; filter:blur(16px); pointer-events:none;
+    background:linear-gradient(180deg,
+      rgba(255,216,132,0.10) 0%, rgba(246,184,63,0.045) 42%, rgba(24,64,106,0) 100%);
+  }
+  /* Horizon scatter pooling at the bottom edge. */
+  .horizon {
+    position:absolute; left:50%; bottom:0; transform:translateX(-50%);
+    width:340px; height:280px; pointer-events:none;
+    background:radial-gradient(ellipse 58% 72% at 50% 100%,
+      rgba(255,216,132,0.15) 0%, rgba(224,169,60,0.07) 36%, rgba(24,64,106,0) 72%);
+  }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="pillar"></div>
+
+    <div class="sun-stage">
+      <svg class="sun-svg" width="600" height="600" viewBox="0 0 600 600"
+           xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rising sun">
+        <defs>
+          <!-- Wide atmospheric corona: gold dissolving into navy. -->
+          <radialGradient id="corona" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#FFD884" stop-opacity="0.50"/>
+            <stop offset="13%"  stop-color="#F6B83F" stop-opacity="0.40"/>
+            <stop offset="29%"  stop-color="#E0A93C" stop-opacity="0.25"/>
+            <stop offset="50%"  stop-color="#C8842B" stop-opacity="0.12"/>
+            <stop offset="73%"  stop-color="#18406A" stop-opacity="0.04"/>
+            <stop offset="100%" stop-color="#0B1E36" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Mid bloom: cream into molten gold — the body of light seen through haze. -->
+          <radialGradient id="bloom" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#FFF6E2" stop-opacity="0.95"/>
+            <stop offset="24%"  stop-color="#FFE7B0" stop-opacity="0.82"/>
+            <stop offset="48%"  stop-color="#FFD069" stop-opacity="0.50"/>
+            <stop offset="72%"  stop-color="#F0A832" stop-opacity="0.20"/>
+            <stop offset="100%" stop-color="#E0A93C" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- The disc: white-hot core -> cream -> molten gold -> deep amber edge. -->
+          <radialGradient id="disc" cx="50%" cy="46%" r="54%">
+            <stop offset="0%"   stop-color="#FFFEF9"/>
+            <stop offset="32%"  stop-color="#FFFBEF"/>
+            <stop offset="56%"  stop-color="#FFF1CF"/>
+            <stop offset="78%"  stop-color="#FFD884"/>
+            <stop offset="92%"  stop-color="#F6B83F"/>
+            <stop offset="100%" stop-color="#E0A93C"/>
+          </radialGradient>
+
+          <!-- Tight white-hot kernel; kept just inside the disc so the orb stays readable. -->
+          <radialGradient id="kernel" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#FFFEF9" stop-opacity="1"/>
+            <stop offset="40%"  stop-color="#FFFDF4" stop-opacity="0.85"/>
+            <stop offset="100%" stop-color="#FFF1CF" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Barely-there atmospheric halo ring (soft, not a spoke). -->
+          <radialGradient id="hazering" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#FFD884" stop-opacity="0"/>
+            <stop offset="60%"  stop-color="#FFD884" stop-opacity="0"/>
+            <stop offset="77%"  stop-color="#FFE6AE" stop-opacity="0.14"/>
+            <stop offset="86%"  stop-color="#F6B83F" stop-opacity="0.08"/>
+            <stop offset="100%" stop-color="#E0A93C" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Soft displacement so the bloom edge isn't a perfect circle (gentle). -->
+          <filter id="warp" x="-30%" y="-30%" width="160%" height="160%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.010" numOctaves="2" seed="11" result="t"/>
+            <feDisplacementMap in="SourceGraphic" in2="t" scale="16"
+              xChannelSelector="R" yChannelSelector="G"/>
+            <feGaussianBlur stdDeviation="7"/>
+          </filter>
+
+          <filter id="softblur" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="9"/>
+          </filter>
+          <filter id="edgeblur" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
+
+          <!-- Whisper of grain to kill the vector sheen across the orb. -->
+          <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="n"/>
+            <feColorMatrix in="n" type="matrix"
+              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0" result="na"/>
+            <feComposite in="na" in2="SourceGraphic" operator="in" result="g"/>
+            <feBlend in="SourceGraphic" in2="g" mode="screen"/>
+          </filter>
+        </defs>
+
+        <!-- 1. Wide warped corona — irregular outer glow bleeding into the sky. -->
+        <circle cx="300" cy="300" r="290" fill="url(#corona)" filter="url(#warp)"/>
+        <!-- 2. Clean corona on top to keep luminosity centered. -->
+        <circle cx="300" cy="300" r="270" fill="url(#corona)" opacity="0.65"/>
+        <!-- 3. Faint atmospheric halo. -->
+        <circle cx="300" cy="300" r="205" fill="url(#hazering)"/>
+        <!-- 4. Main bloom body, softly blurred. -->
+        <circle cx="300" cy="300" r="175" fill="url(#bloom)" filter="url(#softblur)"/>
+        <!-- 5. Disc — a soft outer pass plus a crisper inner pass for a luminous-but-defined orb. -->
+        <circle cx="300" cy="300" r="90" fill="url(#disc)" filter="url(#softblur)" opacity="0.9"/>
+        <circle cx="300" cy="300" r="84" fill="url(#disc)" filter="url(#edgeblur)"/>
+        <!-- 6. White-hot kernel kept within the disc. -->
+        <circle cx="300" cy="300" r="78" fill="url(#kernel)" opacity="0.9"/>
+        <!-- 7. Faint grain over the orb. -->
+        <circle cx="300" cy="300" r="150" fill="#FFF1CF" opacity="0.03" filter="url(#grain)"/>
+      </svg>
+    </div>
+
+    <div class="horizon"></div>
+  </div>
+</body>
+</html>

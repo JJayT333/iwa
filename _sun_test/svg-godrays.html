@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Into Action Group — Sunrise</title>
+<style>
+  body { margin:0; background:#06101f; }
+  .frame {
+    width:390px; height:760px; margin:0 auto; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, #0B1E36 0%, #0A1B31 38%, #0F2A47 72%, #18406A 100%);
+  }
+  .sun {
+    position:absolute; left:50%; top:45%; width:390px; height:390px;
+    transform:translate(-50%,-50%);
+  }
+  .sun svg { display:block; width:100%; height:100%; overflow:visible; }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="sun">
+      <svg viewBox="0 0 390 390" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A luminous sunrise over a navy horizon">
+
+        <defs>
+          <filter id="rayWarp" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.022" numOctaves="3" seed="7" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="46" xChannelSelector="R" yChannelSelector="G"/>
+            <feGaussianBlur stdDeviation="5"/>
+          </filter>
+
+          <filter id="softBlurBig" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="14"/>
+          </filter>
+          <filter id="softBlurMed" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="7"/>
+          </filter>
+          <filter id="coreBlur" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="2.2"/>
+          </filter>
+          <filter id="grain" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="11" result="g"/>
+            <feColorMatrix in="g" type="matrix" values="0 0 0 0 1  0 0 0 0 0.93  0 0 0 0 0.78  0 0 0 0.5 0"/>
+            <feComposite operator="in" in2="SourceGraphic"/>
+          </filter>
+
+          <radialGradient id="bloom" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="#FFFEF9" stop-opacity="1"/>
+            <stop offset="7%"  stop-color="#FFF6E0" stop-opacity="1"/>
+            <stop offset="15%" stop-color="#FFF1CF" stop-opacity="0.98"/>
+            <stop offset="27%" stop-color="#FFD884" stop-opacity="0.92"/>
+            <stop offset="42%" stop-color="#F6B83F" stop-opacity="0.62"/>
+            <stop offset="60%" stop-color="#E0A93C" stop-opacity="0.28"/>
+            <stop offset="78%" stop-color="#9A6B2A" stop-opacity="0.10"/>
+            <stop offset="100%" stop-color="#18406A" stop-opacity="0"/>
+          </radialGradient>
+
+          <radialGradient id="disc" cx="50%" cy="46%" r="55%">
+            <stop offset="0%"  stop-color="#FFFEF9"/>
+            <stop offset="40%" stop-color="#FFF6DD"/>
+            <stop offset="72%" stop-color="#FFE2A0"/>
+            <stop offset="100%" stop-color="#F6B83F"/>
+          </radialGradient>
+
+          <linearGradient id="pillar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#FFD884" stop-opacity="0"/>
+            <stop offset="48%"  stop-color="#FFE7B0" stop-opacity="0.42"/>
+            <stop offset="62%"  stop-color="#FFF1CF" stop-opacity="0.30"/>
+            <stop offset="100%" stop-color="#F6B83F" stop-opacity="0"/>
+          </linearGradient>
+
+          <radialGradient id="scatter" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#FFE0A0" stop-opacity="0.40"/>
+            <stop offset="55%"  stop-color="#E0A93C" stop-opacity="0.14"/>
+            <stop offset="100%" stop-color="#18406A" stop-opacity="0"/>
+          </radialGradient>
+
+          <radialGradient id="rayFill" cx="50%" cy="100%" r="100%">
+            <stop offset="0%"   stop-color="#FFF1CF" stop-opacity="0.5"/>
+            <stop offset="45%"  stop-color="#FFD884" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#F6B83F" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <rect x="160" y="0" width="70" height="390" fill="url(#pillar)" filter="url(#softBlurBig)"/>
+
+        <ellipse cx="195" cy="232" rx="240" ry="62" fill="url(#scatter)" filter="url(#softBlurBig)"/>
+
+        <g filter="url(#rayWarp)" opacity="0.9">
+          <g transform="translate(195,178)">
+            <g transform="rotate(-86)"><path d="M-7 0 L7 0 L3 -150 L-3 -150 Z" fill="url(#rayFill)" opacity="0.55"/></g>
+            <g transform="rotate(-58)"><path d="M-12 0 L12 0 L5 -205 L-5 -205 Z" fill="url(#rayFill)" opacity="0.9"/></g>
+            <g transform="rotate(-40)"><path d="M-6 0 L6 0 L3 -118 L-3 -118 Z" fill="url(#rayFill)" opacity="0.45"/></g>
+            <g transform="rotate(-22)"><path d="M-16 0 L16 0 L7 -240 L-7 -240 Z" fill="url(#rayFill)" opacity="1"/></g>
+            <g transform="rotate(-6)"><path d="M-9 0 L9 0 L4 -160 L-4 -160 Z" fill="url(#rayFill)" opacity="0.6"/></g>
+            <g transform="rotate(12)"><path d="M-14 0 L14 0 L6 -225 L-6 -225 Z" fill="url(#rayFill)" opacity="0.85"/></g>
+            <g transform="rotate(30)"><path d="M-7 0 L7 0 L3 -135 L-3 -135 Z" fill="url(#rayFill)" opacity="0.5"/></g>
+            <g transform="rotate(52)"><path d="M-11 0 L11 0 L5 -195 L-5 -195 Z" fill="url(#rayFill)" opacity="0.75"/></g>
+            <g transform="rotate(74)"><path d="M-8 0 L8 0 L4 -150 L-4 -150 Z" fill="url(#rayFill)" opacity="0.5"/></g>
+            <g transform="rotate(92)"><path d="M-6 0 L6 0 L3 -110 L-3 -110 Z" fill="url(#rayFill)" opacity="0.4"/></g>
+          </g>
+        </g>
+
+        <circle cx="195" cy="178" r="180" fill="url(#bloom)"/>
+
+        <circle cx="195" cy="178" r="92" fill="url(#bloom)" filter="url(#softBlurMed)" opacity="0.9"/>
+
+        <circle cx="195" cy="178" r="44" fill="url(#disc)" filter="url(#coreBlur)"/>
+
+        <circle cx="195" cy="172" r="20" fill="#FFFEF9" filter="url(#coreBlur)" opacity="0.95"/>
+
+        <circle cx="195" cy="178" r="150" fill="#fff" filter="url(#grain)" opacity="0.06"/>
+
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

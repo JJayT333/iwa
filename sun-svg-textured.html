@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Into Action Group — Sun (svg-textured)</title>
+<style>
+  html,body { margin:0; height:100%; background:#070f1c; }
+  .stage { min-height:100%; display:flex; align-items:center; justify-content:center; }
+  .frame {
+    width:390px; height:760px; margin:0 auto; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, #0B1E36 0%, #0A1B31 38%, #0F2A47 72%, #18406A 100%);
+  }
+  /* The whole sun lives in this container so it can be transformed as one unit
+     for the future "rising" animation (translate + scale + brighten). */
+  .sun {
+    position:absolute;
+    left:50%;
+    top:45%;
+    width:520px;
+    height:520px;
+    transform:translate(-50%,-50%);
+    will-change:transform,opacity;
+  }
+  .sun svg { display:block; width:100%; height:100%; overflow:visible; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="frame">
+    <div class="sun" role="img" aria-label="A luminous risen sun glowing warm gold over a deep navy dawn sky.">
+      <svg viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Organic shimmer for the corona/haze: low-frequency fractal noise,
+               displaced so the glow edge breaks up instead of being a clean vector ring. -->
+          <filter id="coronaTex" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.014 0.018" numOctaves="3" seed="7" stitchTiles="stitch" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G" result="disp"/>
+            <feGaussianBlur in="disp" stdDeviation="11"/>
+          </filter>
+
+          <!-- Fine solar-surface grain for the disc: higher frequency, gentle displacement,
+               kept subtle so it reads as heat texture, not noise. The silhouette is kept
+               perfectly round by clipping AFTER this filter (see discClip usage). -->
+          <filter id="discTex" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.045 0.052" numOctaves="4" seed="22" stitchTiles="stitch" result="grain"/>
+            <feDisplacementMap in="SourceGraphic" in2="grain" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/>
+            <feGaussianBlur in="d" stdDeviation="0.5"/>
+          </filter>
+
+          <!-- Soft mottled overlay that we multiply onto the disc for sunspot-like variation. -->
+          <filter id="mottle" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.028" numOctaves="4" seed="41" stitchTiles="stitch" result="m"/>
+            <feColorMatrix in="m" type="matrix"
+              values="0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 0 0
+                      0.9 0.9 0.9 0 -0.55" result="mask"/>
+            <feComponentTransfer in="mask" result="soft">
+              <feFuncA type="gamma" amplitude="1" exponent="1.6" offset="0"/>
+            </feComponentTransfer>
+            <feGaussianBlur in="soft" stdDeviation="3"/>
+          </filter>
+
+          <!-- Big soft bloom for outer light scatter. -->
+          <filter id="bloom" x="-80%" y="-80%" width="260%" height="260%" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="26"/>
+          </filter>
+
+          <!-- WIDE outer atmospheric halo: white-hot core -> cream -> gold -> amber, fading
+               to fully transparent (no navy mix — navy mixed with gold reads as muddy grey). -->
+          <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="#FFFEF9" stop-opacity="0.95"/>
+            <stop offset="14%" stop-color="#FFF1CF" stop-opacity="0.82"/>
+            <stop offset="30%" stop-color="#FFE0A0" stop-opacity="0.5"/>
+            <stop offset="48%" stop-color="#F6B83F" stop-opacity="0.26"/>
+            <stop offset="68%" stop-color="#E0A93C" stop-opacity="0.10"/>
+            <stop offset="85%" stop-color="#E0A93C" stop-opacity="0.02"/>
+            <stop offset="100%" stop-color="#E0A93C" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- The disc itself: white-hot center grading to molten gold rim. -->
+          <radialGradient id="disc" cx="50%" cy="46%" r="56%">
+            <stop offset="0%"  stop-color="#FFFEF9"/>
+            <stop offset="34%" stop-color="#FFF1CF"/>
+            <stop offset="60%" stop-color="#FFD884"/>
+            <stop offset="82%" stop-color="#F6B83F"/>
+            <stop offset="96%" stop-color="#E0A93C"/>
+            <stop offset="100%" stop-color="#D99A30"/>
+          </radialGradient>
+
+          <!-- Inner core hotspot to keep the very center reading as white-hot. -->
+          <radialGradient id="core" cx="50%" cy="46%" r="40%">
+            <stop offset="0%"  stop-color="#FFFEF9" stop-opacity="1"/>
+            <stop offset="55%" stop-color="#FFF6E0" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#FFF1CF" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Rim warmth: a thin molten amber edge to give the disc a "limb" / depth. -->
+          <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#E0A93C" stop-opacity="0"/>
+            <stop offset="86%"  stop-color="#E0A93C" stop-opacity="0"/>
+            <stop offset="94%"  stop-color="#F6B83F" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#C8861F" stop-opacity="0.0"/>
+          </radialGradient>
+
+          <!-- Faint elongated light pillar reflecting toward the horizon (downward),
+               built as a soft radial so it has feathered sides, not a hard rectangle. -->
+          <radialGradient id="pillar" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="#FFE0A0" stop-opacity="0.30"/>
+            <stop offset="55%" stop-color="#F6B83F" stop-opacity="0.10"/>
+            <stop offset="100%" stop-color="#F6B83F" stop-opacity="0"/>
+          </radialGradient>
+
+          <clipPath id="discClip"><circle cx="260" cy="260" r="96"/></clipPath>
+        </defs>
+
+        <!-- 1. Wide soft atmospheric halo (the bloom that makes it luminous, not flat). -->
+        <circle cx="260" cy="260" r="250" fill="url(#halo)"/>
+
+        <!-- 2. Organic, irregular haze ring — textured so the glow edge is broken, not vector.
+                This is the "soft rays/scatter" without literal spokes. -->
+        <g filter="url(#coronaTex)" opacity="0.9">
+          <circle cx="260" cy="260" r="150" fill="url(#halo)"/>
+        </g>
+
+        <!-- 3. A few SOFT, IRREGULAR light streaks — varied length/width/opacity, heavily blurred.
+                Light, not spikes. Warm only (gold/cream) so the bloom never desaturates to grey.
+                Kept faint — the bloom + haze do most of the work. -->
+        <g filter="url(#bloom)" opacity="0.42">
+          <ellipse cx="260" cy="124" rx="8"  ry="56" fill="#FFE9B8" opacity="0.65"/>
+          <ellipse cx="384" cy="236" rx="50" ry="7"  fill="#FFD884" opacity="0.42"/>
+          <ellipse cx="146" cy="284" rx="44" ry="6"  fill="#FFD884" opacity="0.38"/>
+          <ellipse cx="206" cy="158" rx="6"  ry="36" fill="#FFE0A0" opacity="0.42" transform="rotate(-32 206 158)"/>
+          <ellipse cx="332" cy="352" rx="5"  ry="40" fill="#FFD884" opacity="0.36" transform="rotate(34 332 352)"/>
+          <ellipse cx="260" cy="398" rx="9"  ry="32" fill="#FFE0A0" opacity="0.42"/>
+        </g>
+
+        <!-- 4. Faint downward light pillar toward the horizon — feathered ellipse, soft and
+                short so it reads as gentle atmospheric scatter, not a comet tail. -->
+        <ellipse cx="260" cy="372" rx="34" ry="118" fill="url(#pillar)" opacity="0.45"/>
+
+        <!-- 5. Bloom layer hugging the disc for the bright halo right at the edge. -->
+        <circle cx="260" cy="260" r="118" fill="url(#halo)" filter="url(#bloom)" opacity="0.8"/>
+
+        <!-- 6. The sun disc. Surface gets organic displacement for shimmer, but the whole
+                textured layer is clipped to a clean round disc so the limb stays circular
+                (the lumpy-potato silhouette was the cheap tell in the first draft). -->
+        <g clip-path="url(#discClip)">
+          <g filter="url(#discTex)">
+            <circle cx="260" cy="260" r="104" fill="url(#disc)"/>
+          </g>
+        </g>
+
+        <!-- 7. Sunspot-style mottling multiplied over the disc (clipped to the disc). -->
+        <g clip-path="url(#discClip)" style="mix-blend-mode:multiply" opacity="0.16">
+          <circle cx="260" cy="260" r="96" fill="#C8861F" filter="url(#mottle)"/>
+        </g>
+
+        <!-- 8. Warm molten rim/limb for depth. -->
+        <circle cx="260" cy="260" r="96" fill="url(#rim)"/>
+
+        <!-- 9. White-hot inner core, screen-blended so the center truly glows. Centered. -->
+        <g style="mix-blend-mode:screen">
+          <circle cx="260" cy="258" r="70" fill="url(#core)"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+</body>
+</html>

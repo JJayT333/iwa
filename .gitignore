@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Deploy artifacts
+*.zip
+
+# Test/tool output
+output/
+.playwright-cli/
+
+# Local-only Claude settings
+.claude/settings.local.json

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Into Action — sunrise</title>
+<style>
+  body { margin:0; background:#06101f; }
+  .frame { width:390px; height:760px; margin:0 auto; position:relative; overflow:hidden;
+    background: linear-gradient(180deg, #0B1E36 0%, #0A1B31 38%, #0F2A47 72%, #18406A 100%); }
+
+  /* ONE transformable container, optical-centered ~45% from top */
+  .sun {
+    position:absolute;
+    left:50%; top:45%;
+    width:520px; height:520px;
+    transform: translate(-50%, -50%);
+    transform-origin:50% 50%;
+    will-change: transform, opacity;
+  }
+  .sun svg { display:block; width:100%; height:100%; overflow:visible; }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="sun" role="img" aria-label="A luminous golden sun with soft volumetric light rays, fully risen over a dawn-blue horizon.">
+      <svg viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Core luminosity stack -->
+          <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="#FFE6A8" stop-opacity="0.55"/>
+            <stop offset="32%" stop-color="#F6B83F" stop-opacity="0.34"/>
+            <stop offset="60%" stop-color="#E0A93C" stop-opacity="0.14"/>
+            <stop offset="100%" stop-color="#E0A93C" stop-opacity="0"/>
+          </radialGradient>
+
+          <radialGradient id="disc" cx="50%" cy="46%" r="52%">
+            <stop offset="0%"   stop-color="#FFFEF9"/>
+            <stop offset="22%"  stop-color="#FFF1CF"/>
+            <stop offset="48%"  stop-color="#FFD884"/>
+            <stop offset="74%"  stop-color="#F6B83F"/>
+            <stop offset="100%" stop-color="#E0A93C"/>
+          </radialGradient>
+
+          <radialGradient id="discEdge" cx="50%" cy="50%" r="50%">
+            <stop offset="62%" stop-color="#E0A93C" stop-opacity="0"/>
+            <stop offset="88%" stop-color="#E0A93C" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#C98A2A" stop-opacity="0.7"/>
+          </radialGradient>
+
+          <radialGradient id="hotCore" cx="50%" cy="44%" r="34%">
+            <stop offset="0%"  stop-color="#FFFEF9" stop-opacity="0.95"/>
+            <stop offset="55%" stop-color="#FFF1CF" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#FFF1CF" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- A single ray: bright at the disc, fading to nothing outward -->
+          <linearGradient id="rayGrad" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%"   stop-color="#FFE8B0" stop-opacity="0"/>
+            <stop offset="14%"  stop-color="#FFE2A0" stop-opacity="0.85"/>
+            <stop offset="55%"  stop-color="#F6B83F" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#F6B83F" stop-opacity="0"/>
+          </linearGradient>
+
+          <!-- Vertical light pillar -->
+          <linearGradient id="pillar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#FFE2A0" stop-opacity="0"/>
+            <stop offset="42%"  stop-color="#FFE2A0" stop-opacity="0.30"/>
+            <stop offset="50%"  stop-color="#FFF1CF" stop-opacity="0.42"/>
+            <stop offset="58%"  stop-color="#FFE2A0" stop-opacity="0.30"/>
+            <stop offset="100%" stop-color="#FFE2A0" stop-opacity="0"/>
+          </linearGradient>
+
+          <!-- Warm horizon scatter -->
+          <radialGradient id="scatter" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="#F6B83F" stop-opacity="0.40"/>
+            <stop offset="55%" stop-color="#E0A93C" stop-opacity="0.13"/>
+            <stop offset="100%" stop-color="#E0A93C" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- GENTLE blur for the rays -->
+          <filter id="raySoft" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="3.2"/>
+          </filter>
+
+          <!-- Tiny irregularity: low-scale warp so rays aren't a mechanical clock.
+               displacementScale = 6 (was 46). Bounded region. -->
+          <filter id="rayWarp" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.006" numOctaves="2" seed="7" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+            <feGaussianBlur stdDeviation="2.4"/>
+          </filter>
+
+          <filter id="coreSoft" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="1.4"/>
+          </filter>
+        </defs>
+
+        <!-- WARM HORIZON SCATTER (wide, low, soft) -->
+        <ellipse cx="260" cy="332" rx="250" ry="120" fill="url(#scatter)"/>
+
+        <!-- OUTER HALO -->
+        <circle cx="260" cy="260" r="248" fill="url(#halo)"/>
+
+        <!-- VERTICAL LIGHT PILLAR (separate from rays) -->
+        <rect x="232" y="6" width="56" height="508" rx="28" fill="url(#pillar)" filter="url(#raySoft)"/>
+
+        <!-- VOLUMETRIC RAYS
+             Each beam is a tapered wedge originating near the disc edge (r~118)
+             and fading outward. Built upright then rotated about (260,260).
+             Distribution favors lower hemisphere + horizontal axes to avoid top-heaviness.
+             Wedge apex is OUTWARD (top), wide base sits at the disc. -->
+        <g filter="url(#rayWarp)">
+          <g filter="url(#raySoft)" fill="url(#rayGrad)">
+            <!-- helper geometry: base width W centered at x=260, base y=142 (disc edge),
+                 apex at y=(142-LEN). We draw per-ray with explicit points + rotate. -->
+
+            <!-- TOP region (kept restrained: shorter, thinner — no horns) -->
+            <g transform="rotate(0 260 260)">
+              <polygon points="248,146 272,146 266,30 254,30"/>
+            </g>
+            <g transform="rotate(34 260 260)">
+              <polygon points="250,146 270,146 265,58 255,58"/>
+            </g>
+            <g transform="rotate(-34 260 260)">
+              <polygon points="250,146 270,146 264,52 256,52"/>
+            </g>
+            <g transform="rotate(18 260 260)">
+              <polygon points="252,148 268,148 264,86 256,86"/>
+            </g>
+            <g transform="rotate(-18 260 260)">
+              <polygon points="252,148 268,148 265,80 255,80"/>
+            </g>
+
+            <!-- HORIZONTAL axes (long, prominent — anchors the composition) -->
+            <g transform="rotate(78 260 260)">
+              <polygon points="246,144 274,144 266,8 254,8"/>
+            </g>
+            <g transform="rotate(102 260 260)">
+              <polygon points="246,144 274,144 267,12 253,12"/>
+            </g>
+            <g transform="rotate(64 260 260)">
+              <polygon points="250,146 270,146 264,54 256,54"/>
+            </g>
+            <g transform="rotate(116 260 260)">
+              <polygon points="250,146 270,146 265,60 255,60"/>
+            </g>
+
+            <!-- LOWER hemisphere (slightly more & longer to balance the pillar/top) -->
+            <g transform="rotate(146 260 260)">
+              <polygon points="248,146 272,146 265,36 255,36"/>
+            </g>
+            <g transform="rotate(-146 260 260)">
+              <polygon points="248,146 272,146 266,40 254,40"/>
+            </g>
+            <g transform="rotate(162 260 260)">
+              <polygon points="251,148 269,148 264,74 256,74"/>
+            </g>
+            <g transform="rotate(-162 260 260)">
+              <polygon points="251,148 269,148 265,68 255,68"/>
+            </g>
+            <g transform="rotate(180 260 260)">
+              <polygon points="247,146 273,146 266,18 254,18"/>
+            </g>
+            <g transform="rotate(131 260 260)">
+              <polygon points="253,150 267,150 263,98 257,98"/>
+            </g>
+            <g transform="rotate(-131 260 260)">
+              <polygon points="253,150 267,150 264,104 256,104"/>
+            </g>
+          </g>
+        </g>
+
+        <!-- DISC -->
+        <circle cx="260" cy="260" r="126" fill="url(#disc)"/>
+        <circle cx="260" cy="260" r="126" fill="url(#discEdge)"/>
+        <!-- inner white-hot bloom -->
+        <circle cx="260" cy="256" r="92" fill="url(#hotCore)" filter="url(#coreSoft)"/>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
