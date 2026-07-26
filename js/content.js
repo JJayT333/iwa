@@ -57,7 +57,7 @@ const AA = {
   twelveTraditions:"https://www.aa.org/the-twelve-traditions",
   preamble:        "https://www.aa.org/aa-preamble",
   safetyCardPdf:   "https://www.aa.org/sites/default/files/literature/F-211_1025.pdf",
-  safetyResource:  "https://www.aa.org/safety-and-aa-our-common-welfare-under-revision",
+  safetyResource:  "https://www.aa.org/aa-guidelines-safety-and-aa-groups",
   // Big Book chapter PDFs:
   chHowItWorks:    "https://www.aa.org/sites/default/files/2021-11/en_bigbook_chapt5.pdf",
   chIntoAction:    "https://www.aa.org/sites/default/files/2021-11/en_bigbook_chapt6.pdf",
@@ -112,7 +112,7 @@ window.IAG = {
         times: [
           { days: [1, 2, 3, 4, 5], h: 7, m: 0,  label: "7:00 AM", short: "7:00" },
           { days: [1],             h: 17, m: 30, label: "5:30 PM", short: "5:30", name: "Ladies Meeting" },
-          { days: [2],             h: 19, m: 0,  label: "7:00 PM", short: "7:00", name: "12 & 12 Book Study" },
+          { days: [2],             h: 19, m: 0,  label: "7:00 PM", short: "7:00", name: "Book Study" },
           { days: [4],             h: 19, m: 0,  label: "7:00 PM", short: "7:00", name: "Men's Meeting" },
           { days: [6],             h: 7, m: 30, label: "7:30 AM", short: "7:30" },
           { days: [0],             h: 7, m: 30, label: "7:30 AM", short: "7:30", zoomOnly: true },
@@ -167,7 +167,7 @@ window.IAG = {
               note: "In person and on Zoom" },
             { emblem: "ladies", title: "Ladies Meeting", time: "Monday · 5:30 PM",
               note: "In person and on Zoom" },
-            { emblem: "book", title: "12 & 12 Book Study", time: "Tuesday · 7:00 PM",
+            { emblem: "book", title: "Book Study", time: "Tuesday · 7:00 PM",
               note: "In person and on Zoom" },
             { emblem: "men", title: "Men's Meeting", time: "Thursday · 7:00 PM",
               note: "In person and on Zoom. This meeting uses a separate app and Zoom link; get with one of the men for access." },
@@ -200,8 +200,8 @@ window.IAG = {
           items: [
             { label: "How It Works", sublabel: "Big Book, Chapter 5",              href: AA.chHowItWorks,   external: true },
             { label: "Into Action",  sublabel: "Big Book, Chapter 6",              href: AA.chIntoAction,   external: true },
-            { label: "The Ninth Step Promises", sublabel: "Big Book, Chapter 6",   href: AA.chIntoAction,   external: true },
-            { label: "On Awakening", sublabel: "Big Book, Chapter 6",              href: AA.chIntoAction,   external: true },
+            { label: "The Ninth Step Promises", sublabel: "Big Book, Chapter 6, pp. 83–84", href: AA.chIntoAction, external: true },
+            { label: "On Awakening", sublabel: "Big Book, Chapter 6, pp. 86–88", href: AA.chIntoAction, external: true },
             { label: "A Vision for You", sublabel: "Big Book, Chapter 11",         href: AA.chVisionForYou, external: true },
           ] },
       ],
@@ -446,7 +446,7 @@ window.IAG = {
       blocks: [
         { type: "card", title: "Two Way Prayer",
           body: "Two-way prayer is the practice of not only talking to God, but taking quiet time to listen — an Eleventh Step tool the earliest A.A.s carried over from the Oxford Group. TwoWayPrayer.org is a nonprofit with a book, workshops, and resources for the practice." },
-        { type: "link", label: "Learn Two Way Prayer (twowayprayer.org)", href: "https://www.twowayprayer.org", external: true, variant: "primary" },
+        { type: "link", label: "Visit Two Way Prayer", href: "https://www.twowayprayer.org", external: true, variant: "primary" },
       ],
     },
 
@@ -466,7 +466,7 @@ window.IAG = {
         { type: "card", title: "Safety and A.A.",
           body: "Safety is everyone's responsibility. The official “Safety Card for A.A. Groups” offers guidance for keeping meetings safe and welcoming." },
         { type: "link", label: "Open the Safety Card (PDF)", href: AA.safetyCardPdf, external: true, variant: "primary" },
-        { type: "link", label: "Safety & A.A. resource",     href: AA.safetyResource, external: true, variant: "secondary" },
+        { type: "link", label: "A.A. Guidelines on Safety", href: AA.safetyResource, external: true, variant: "secondary" },
       ],
     },
 
@@ -512,7 +512,7 @@ window.IAG = {
               body: "We give chips at the In2Action group, with the first chip being a “Desire Chip,” which is an outward sign of an inward commitment to not drink for the next 24 hours. Would anyone like a “Desire Chip”?\n\nWe also celebrate monthly sobriety — months one through eleven. Is anyone celebrating a monthly birthday?\n\nAnnual birthdays and 18 months are celebrated on the 1st Saturday of each month. Please let ____________ know when your birthday is near so we can plan accordingly." },
 
             { heading: "9 · Announcements & 7th Tradition",
-              body: "Are there any AA-related announcements from the floor?\n\nIn observance of the 7th Tradition, we collect donations from the members of this group. These donations pay for our Zoom subscription, rent, coffee, and paper goods, as well as literature for the newcomer. The suggested donation is $2, and can be donated either through the basket in the room or our virtual basket within our App, which has numerous options such as Zelle, Debit Card, Google, and Apple Pay." },
+              body: "Are there any AA-related announcements from the floor?\n\nWe have our ladies meeting Monday at 5:30 PM, in person and on Zoom. Tuesday night Book Study is at 7:00 PM, in person and on Zoom. Both use the Into Action app.\n\nThursday at 7:00 PM we have the men's group on a different app and Zoom. Get with one of the guys if you need that.\n\nIn observance of the 7th Tradition, we collect donations from the members of this group. These donations pay for our Zoom subscription, rent, coffee, and paper goods, as well as literature for the newcomer. The suggested donation is $2, and can be donated either through the basket in the room or our virtual basket within our App, which has numerous options such as Zelle, Debit Card, Google, and Apple Pay." },
 
             { heading: "10 · Lord's Prayer & Closing",
               body: "Let's end this meeting affirming the 12th Tradition, which states:\n\n“Anonymity is the spiritual foundation of all our traditions, reminding us to put principles before personalities.”\n\nPlease remember our Anonymity … what is said here … stays here!\n\nThis concludes today's meeting. Please join us in the Lord's Prayer.\n\n______ or ROOM, will you take us out." },

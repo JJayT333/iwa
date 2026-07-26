@@ -184,6 +184,9 @@ HTTPS is required for "Add to Home Screen." Any of these work — pick one:
 ## 📲 Installing on a phone
 - **iPhone (Safari):** tap **Share** → **Add to Home Screen**. (The app shows a
   one-time hint.)
+- **iPhone (Google app):** tap **Share** → **Open in Safari** or
+  **Open in Chrome**. In that browser, tap **Share** → **Add to Home Screen**.
+  The app detects the Google app and shows these steps automatically.
 - **Android (Chrome):** tap the **Install** banner, or menu → **Install app**.
 
 Once installed it launches full-screen with the sunrise icon and works offline.
