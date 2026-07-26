@@ -35,6 +35,7 @@
     copy:       '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4.5 16V6a2 2 0 0 1 2-2H16"/>',
     external:   '<path d="M14 5h5v5"/><path d="M19 5l-8 8"/><path d="M19 13.5V18a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4.5"/>',
     check:      '<path d="M5 12.5l4.5 4.5L19 7"/>',
+    install:    '<path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19h14"/>',
   };
 
   function svg(name, cls) {
@@ -416,7 +417,7 @@
       '<div class="pdf-card__head">' +
         '<h2 class="card__title">' + esc(title) + "</h2>" +
         '<a class="pdf-open" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer" ' +
-          'aria-label="Open the PDF in a new tab">' + svg("external", "pdf-open__ic") + "<span>Open</span></a>" +
+          'aria-label="Open the PDF in a new tab">' + svg("external", "pdf-open__ic") + "<span>Open PDF</span></a>" +
       "</div>" +
       (b.body ? '<p class="pdf-card__note">' + esc(b.body) + "</p>" : "") +
       '<div class="pdf-viewer">' +
@@ -441,8 +442,8 @@
       '<div class="video-card__copy">' +
         '<h2 class="card__title">' + esc(b.title || "Video") + "</h2>" +
         (b.body ? '<p class="video-card__body">' + esc(b.body) + "</p>" : "") +
-        (href ? '<a class="video-card__link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' +
-          "<span>Open on YouTube</span>" + svg("external", "video-card__link-ic") + "</a>" : "") +
+        (href ? '<a class="btn btn--secondary video-card__link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' +
+          "<span>Open on YouTube</span>" + svg("external", "btn-ic") + "</a>" : "") +
       "</div>" +
     "</div>";
   }
@@ -671,13 +672,21 @@
     var ordered = [];
     first.forEach(function (id) { var s = sectionById(id); if (s) ordered.push(s); });
     IAG.sections.forEach(function (s) { if (first.indexOf(s.id) === -1) ordered.push(s); });
+    var installRow = "";
+    if (!isStandalone()) {
+      installRow = '<button class="row" id="installAppBtn" type="button">' +
+        '<span class="row__ic">' + svg("install") + "</span>" +
+        '<span class="row__text"><span class="row__label">Install App</span>' +
+        '<span class="row__sub">' + esc(installRowSubtitle()) + "</span></span>" +
+        svg("chevron", "row__chev") + "</button>";
+    }
     var rows = ordered.map(function (s) {
       return '<a class="row" href="#/' + esc(s.id) + '">' +
         '<span class="row__ic">' + svg(s.icon) + "</span>" +
         '<span class="row__text"><span class="row__label">' + esc(s.title) + "</span></span>" +
         svg("chevron", "row__chev") + "</a>";
     }).join("");
-    return '<div class="section"><div class="card card--list">' + rows + "</div></div>";
+    return '<div class="section"><div class="card card--list">' + installRow + rows + "</div></div>";
   }
 
   /* ---- Top bar & tab bar ------------------------------------------------- */
@@ -754,6 +763,9 @@
     var share = el("shareBtn");
     if (share) share.addEventListener("click", doShare);
 
+    var install = el("installAppBtn");
+    if (install) install.addEventListener("click", showInstallGuide);
+
     Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (btn) {
       btn.addEventListener("click", function () { copyText(btn.getAttribute("data-copy")); });
     });
@@ -813,26 +825,178 @@
   }
 
   /* ---- Install hints ----------------------------------------------------- */
+  var deferredInstallPrompt = null;
+  var installGuideLastFocus = null;
+
+  function isStandalone() {
+    return (("standalone" in navigator) && navigator.standalone) ||
+      window.matchMedia("(display-mode: standalone)").matches;
+  }
+
+  function installEnvironment() {
+    var ua = navigator.userAgent || "";
+    if (/iphone|ipad|ipod/i.test(ua)) {
+      if (/\bGSA\//i.test(ua)) return "google-ios";
+      if (/\bCriOS\//i.test(ua)) return "chrome-ios";
+      return "safari-ios";
+    }
+    return deferredInstallPrompt ? "prompt" : "other";
+  }
+
+  function installRowSubtitle() {
+    var env = installEnvironment();
+    if (env === "google-ios") return "Open in Safari or Chrome first";
+    if (env === "safari-ios" || env === "chrome-ios") return "Add Into Action to your Home Screen";
+    return "Keep Into Action on your Home Screen";
+  }
+
+  function cleanAppUrl() {
+    if (IAG.meta.shareUrl) return IAG.meta.shareUrl;
+    try {
+      var url = new URL(location.href);
+      url.hash = "";
+      return url.href;
+    } catch (e) {
+      return location.href;
+    }
+  }
+
+  function installGuideContent(env) {
+    if (env === "google-ios") {
+      return {
+        title: "Install from the Google app",
+        intro: "The Google app cannot add this page to your Home Screen. Open it in Safari or Chrome first.",
+        steps: [
+          "Tap Share in the Google app.",
+          "Tap “Open in Safari” or “Open in Chrome.”",
+          "In that browser, tap Share, then “Add to Home Screen,” then “Add.”"
+        ]
+      };
+    }
+    if (env === "chrome-ios") {
+      return {
+        title: "Install Into Action",
+        intro: "Add Into Action to your iPhone so it opens like an app.",
+        steps: [
+          "Tap Share to the right of Chrome’s address bar.",
+          "Tap “Add to Home Screen.”",
+          "Confirm the name, then tap “Add.”"
+        ]
+      };
+    }
+    if (env === "safari-ios") {
+      return {
+        title: "Install Into Action",
+        intro: "Add Into Action to your iPhone so it opens like an app.",
+        steps: [
+          "Tap Safari’s Share button.",
+          "Scroll down and tap “Add to Home Screen.”",
+          "Turn on “Open as Web App” if shown, then tap “Add.”"
+        ]
+      };
+    }
+    return {
+      title: "Install Into Action",
+      intro: "Your browser can save Into Action to your Home Screen.",
+      steps: [
+        "Open your browser’s menu.",
+        "Choose “Install app” or “Add to Home Screen.”",
+        "Confirm the installation."
+      ]
+    };
+  }
+
+  function showInstallGuide() {
+    if (isStandalone()) return;
+    if (deferredInstallPrompt) {
+      hideBanner();
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(function () { deferredInstallPrompt = null; });
+      return;
+    }
+
+    closeInstallGuide();
+    var content = installGuideContent(installEnvironment());
+    var steps = content.steps.map(function (step, i) {
+      return '<li><span class="install-guide__number">' + (i + 1) + "</span><span>" + esc(step) + "</span></li>";
+    }).join("");
+    var guide = document.createElement("div");
+    guide.id = "installGuide";
+    guide.className = "install-guide";
+    guide.innerHTML = '<section class="install-guide__sheet" role="dialog" aria-modal="true" ' +
+      'aria-labelledby="installGuideTitle" aria-describedby="installGuideIntro">' +
+      '<button class="install-guide__close" id="installGuideClose" type="button" aria-label="Close">&times;</button>' +
+      '<span class="install-guide__icon">' + svg("install") + "</span>" +
+      '<h2 id="installGuideTitle">' + esc(content.title) + "</h2>" +
+      '<p id="installGuideIntro">' + esc(content.intro) + "</p>" +
+      '<ol class="install-guide__steps">' + steps + "</ol>" +
+      '<button class="btn btn--primary install-guide__copy" id="installGuideCopy" type="button">' +
+      svg("copy", "btn-ic") + "<span>Copy app link</span></button>" +
+      '<button class="btn btn--secondary install-guide__done" id="installGuideDone" type="button">Done</button>' +
+      "</section>";
+
+    installGuideLastFocus = document.activeElement;
+    document.body.appendChild(guide);
+    document.body.classList.add("install-guide-open");
+    el("installGuideClose").addEventListener("click", closeInstallGuide);
+    el("installGuideDone").addEventListener("click", closeInstallGuide);
+    el("installGuideCopy").addEventListener("click", function () {
+      copyText(cleanAppUrl(), "App link copied");
+    });
+    guide.addEventListener("click", function (e) {
+      if (e.target === guide) closeInstallGuide();
+    });
+    requestAnimationFrame(function () {
+      guide.classList.add("is-show");
+      el("installGuideClose").focus();
+    });
+  }
+
+  function closeInstallGuide() {
+    var guide = el("installGuide");
+    if (!guide) return;
+    guide.remove();
+    document.body.classList.remove("install-guide-open");
+    if (installGuideLastFocus && installGuideLastFocus.focus) installGuideLastFocus.focus();
+    installGuideLastFocus = null;
+  }
+
   function setupInstall() {
     // Android / Chrome: capture the prompt and offer a banner button.
-    var deferred = null;
     window.addEventListener("beforeinstallprompt", function (e) {
-      e.preventDefault(); deferred = e;
+      e.preventDefault(); deferredInstallPrompt = e;
       showBanner("Install Into Action on your phone", "Install", function () {
-        hideBanner();
-        deferred.prompt();
-        deferred.userChoice.finally(function () { deferred = null; });
+        showInstallGuide();
       });
     });
 
-    // iOS Safari: no automatic prompt — show a one-time hint.
-    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    var standalone = ("standalone" in navigator) ? navigator.standalone
-                    : window.matchMedia("(display-mode: standalone)").matches;
+    window.addEventListener("appinstalled", function () {
+      deferredInstallPrompt = null;
+      hideBanner();
+      closeInstallGuide();
+      if (parseHash() === "more") navigate();
+      toast("Into Action installed");
+    });
+
+    if (isStandalone()) return;
+    var env = installEnvironment();
+
+    // The Google iOS app is an in-app viewer and cannot add a web app to the
+    // Home Screen. Always explain the browser handoff on a fresh visit.
+    if (env === "google-ios") {
+      showBanner("To install Into Action, open this page in Safari or Chrome first.", "Show me", function () {
+        showInstallGuide();
+      });
+      return;
+    }
+
+    // iOS browsers do not expose an automatic prompt, so show a one-time hint.
     var dismissed = false;
     try { dismissed = localStorage.getItem("iag-ios-hint") === "1"; } catch (e) {}
-    if (isIOS && !standalone && !dismissed) {
-      showBanner("Add to Home Screen: tap Share, then “Add to Home Screen”.", null, null, function () {
+    if ((env === "safari-ios" || env === "chrome-ios") && !dismissed) {
+      showBanner("Add Into Action to your Home Screen.", "Show me", function () {
+        showInstallGuide();
+      }, function () {
         try { localStorage.setItem("iag-ios-hint", "1"); } catch (e) {}
       });
     }
@@ -860,6 +1024,9 @@
 
   /* ---- Boot -------------------------------------------------------------- */
   window.addEventListener("hashchange", navigate);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeInstallGuide();
+  });
   document.addEventListener("DOMContentLoaded", function () {
     navigate();
     setupInstall();

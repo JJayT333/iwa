@@ -5,7 +5,7 @@
    ★ When you change any file, bump CACHE_VERSION (e.g. v1 -> v2) so phones
      pick up the new version. That's the only edit you'll ever make here.
    ============================================================================ */
-const CACHE_VERSION = "iag-v17";
+const CACHE_VERSION = "iag-v19";
 
 // Precache the core app shell only. PDFs and the PDF.js viewer are large and
 // cache on first use (they're not needed to boot the app).
