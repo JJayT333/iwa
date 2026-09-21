@@ -10,3 +10,6 @@ output/
 
 # Local-only Claude settings
 .claude/settings.local.json
+
+# Local Netlify CLI install (node_modules only)
+.netlify-tools/

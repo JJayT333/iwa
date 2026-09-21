@@ -1,0 +1,23 @@
+{
+  "stylesheet": "https://fonts.googleapis.com/css2?family=Lora:wght@400..700&family=Source+Sans+3:wght@400..750&display=swap",
+  "fonts": [
+    {
+      "family": "Lora",
+      "file": "lora-latin-variable.woff2",
+      "bytes": 37792,
+      "sha256": "6b102ab35aa1f2b315788bb4853434ed1e52137603bf7a3da71a682276748d45",
+      "source": "https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwr7I_FMl_E.woff2",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/lora/OFL.txt",
+      "css": "font-family: 'Lora';\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwr7I_FMl_E.woff2) format('woff2');\n  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;"
+    },
+    {
+      "family": "Source Sans 3",
+      "file": "source-sans-3-latin-variable.woff2",
+      "bytes": 28792,
+      "sha256": "ac057a5593cbe3df0d2585da5dd5f33b8efa84aa30550c710fe061b37fc5c54b",
+      "source": "https://fonts.gstatic.com/s/sourcesans3/v19/nwpStKy2OAdR1K-IwhWudF-R3w8aZejf5Hc.woff2",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/sourcesans3/OFL.txt",
+      "css": "font-family: 'Source Sans 3';\n  font-style: normal;\n  font-weight: 400 750;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/sourcesans3/v19/nwpStKy2OAdR1K-IwhWudF-R3w8aZejf5Hc.woff2) format('woff2');\n  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;"
+    }
+  ]
+}

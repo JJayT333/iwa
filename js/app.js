@@ -474,14 +474,181 @@
   }
 
   function renderScript(b) {
-    var parts = (b.parts || []).map(function (p) {
-      return '<section class="script__part"><h3 class="script__head">' + esc(p.heading) + "</h3>" +
-        (p.body ? '<div class="script__body">' + esc(p.body).replace(/\n/g, "<br>") + "</div>"
-                : '<div class="script__empty">Paste this part of your script in content.js</div>') +
-        "</section>";
+    // Keep the source wording; present all parts as one continuous reading.
+    var body = (b.parts || []).map(function (part) { return part.body || ""; })
+      .filter(Boolean).join("\n\n");
+    var paragraphs = body.split(/\n\s*\n/).map(function (paragraph) {
+      return "<p>" + esc(paragraph).replace(/\n/g, "<br>") + "</p>";
     }).join("");
-    return '<div class="card script">' + parts + "</div>";
+    return '<div class="reader-tools" role="group" aria-label="Reading controls">' +
+      '<div class="reader-tools__size">' +
+        '<span class="reader-tools__label">Text size</span>' +
+        '<div class="reader-tools__stepper">' +
+          '<button class="reader-tools__button" id="readerSmaller" type="button" aria-label="Decrease text size">A−</button>' +
+          '<span class="reader-tools__value" id="readerSize" aria-live="polite"></span>' +
+          '<button class="reader-tools__button" id="readerLarger" type="button" aria-label="Increase text size">A+</button>' +
+        "</div>" +
+      "</div>" +
+      '<button class="reader-awake" id="readerAwake" type="button" role="switch" aria-checked="false" aria-describedby="readerAwakeStatus">' +
+        '<span>Keep screen awake</span><span class="reader-awake__state" aria-hidden="true">Off</span>' +
+      "</button>" +
+      '<p class="reader-tools__status" id="readerAwakeStatus" role="status"></p>' +
+      '</div><article class="card script" aria-label="Meeting script"><div class="script__body">' + paragraphs + "</div></article>";
   }
+
+  /* ---- Reading controls: memory only, no saved preferences or positions -- */
+  var TEXT_SIZES = [
+    { key: "standard", label: "Standard" },
+    { key: "large", label: "Large" },
+    { key: "extra-large", label: "Extra large" }
+  ];
+  var textSizeIndex = 0;
+
+  function updateTextSizeControls() {
+    var size = TEXT_SIZES[textSizeIndex];
+    if (el("readerSize")) el("readerSize").textContent = size.label;
+    if (el("readerSmaller")) el("readerSmaller").disabled = textSizeIndex === 0;
+    if (el("readerLarger")) el("readerLarger").disabled = textSizeIndex === TEXT_SIZES.length - 1;
+    if (el("textSizeSummary")) el("textSizeSummary").textContent = size.label;
+  }
+
+  function setTextSize(index) {
+    textSizeIndex = Math.max(0, Math.min(TEXT_SIZES.length - 1, index));
+    document.documentElement.setAttribute("data-text-size", TEXT_SIZES[textSizeIndex].key);
+    updateTextSizeControls();
+  }
+
+  function closeTextSizeDialog() {
+    var dialog = el("textSizeDialog");
+    if (dialog) dialog.close();
+  }
+
+  function showTextSizeDialog() {
+    if (el("textSizeDialog")) return;
+    var dialog = document.createElement("dialog");
+    dialog.id = "textSizeDialog";
+    dialog.className = "text-size-dialog";
+    dialog.setAttribute("aria-labelledby", "textSizeTitle");
+    dialog.setAttribute("aria-describedby", "textSizeIntro");
+    dialog.innerHTML = '<button class="text-size-dialog__close" type="button" aria-label="Close text size settings">&times;</button>' +
+      '<h2 id="textSizeTitle">Text size</h2>' +
+      '<p id="textSizeIntro">Choose a comfortable size for the app.</p>' +
+      '<fieldset class="text-size-options"><legend class="sr-only">Choose text size</legend>' +
+        TEXT_SIZES.map(function (size, index) {
+          return '<label class="text-size-option"><input type="radio" name="text-size" value="' + index + '"' +
+            (index === textSizeIndex ? " checked" : "") + '><span>' + size.label + "</span></label>";
+        }).join("") +
+      '</fieldset><p class="text-size-dialog__note">For this visit only. Reloading resets the size. PDFs have their own zoom controls.</p>' +
+      '<button class="btn btn--primary text-size-dialog__done" type="button">Done</button>';
+    document.body.appendChild(dialog);
+    dialog.querySelector(".text-size-dialog__close").addEventListener("click", closeTextSizeDialog);
+    dialog.querySelector(".text-size-dialog__done").addEventListener("click", closeTextSizeDialog);
+    dialog.addEventListener("change", function (event) {
+      if (event.target.name === "text-size") setTextSize(Number(event.target.value));
+    });
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key !== "Tab") return;
+      var focusable = dialog.querySelectorAll("button, input:checked");
+      var first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    });
+    dialog.addEventListener("close", function () { dialog.remove(); });
+    dialog.showModal();
+    dialog.querySelector("input:checked").focus();
+  }
+
+  var screenAwakeWanted = false;
+  var screenWakeLock = null;
+  var wakeRequestPending = false;
+  var wakeRequestVersion = 0;
+  var wakeMessage = "";
+
+  function supportsScreenWakeLock() {
+    return window.isSecureContext && "wakeLock" in navigator;
+  }
+
+  function updateScreenAwakeControl() {
+    var button = el("readerAwake");
+    if (!button) return;
+    var supported = supportsScreenWakeLock();
+    button.disabled = !supported || wakeRequestPending;
+    button.setAttribute("aria-checked", String(screenAwakeWanted));
+    button.querySelector(".reader-awake__state").textContent = wakeRequestPending ? "…" : (screenAwakeWanted ? "On" : "Off");
+    el("readerAwakeStatus").textContent = !supported ? "Your browser does not support keeping the screen awake." :
+      (wakeMessage || (screenAwakeWanted ? "Only while this script is open." : ""));
+  }
+
+  // Also invalidates an in-flight request, so leaving the reader cannot leave
+  // the screen awake when the browser resolves that request later.
+  function releaseScreenWakeLock() {
+    wakeRequestVersion++;
+    wakeRequestPending = false;
+    var lock = screenWakeLock;
+    screenWakeLock = null;
+    if (lock) lock.release().catch(function () {});
+  }
+
+  function stopKeepingScreenAwake() {
+    screenAwakeWanted = false;
+    wakeMessage = "";
+    releaseScreenWakeLock();
+    updateScreenAwakeControl();
+  }
+
+  function requestScreenWakeLock() {
+    if (!screenAwakeWanted || screenWakeLock || wakeRequestPending || document.visibilityState !== "visible" ||
+        parseHash() !== "meeting-script" || !supportsScreenWakeLock()) return;
+    var version = ++wakeRequestVersion;
+    wakeRequestPending = true;
+    wakeMessage = "";
+    updateScreenAwakeControl();
+    navigator.wakeLock.request("screen").then(function (lock) {
+      if (version !== wakeRequestVersion || !screenAwakeWanted || parseHash() !== "meeting-script" || document.visibilityState !== "visible") {
+        return lock.release();
+      }
+      screenWakeLock = lock;
+      lock.addEventListener("release", function () {
+        if (screenWakeLock !== lock) return;
+        screenWakeLock = null;
+        if (document.visibilityState === "visible") {
+          screenAwakeWanted = false;
+          wakeMessage = "Your device paused this. You can turn it on again.";
+        }
+        updateScreenAwakeControl();
+      });
+    }).catch(function () {
+      if (version !== wakeRequestVersion) return;
+      screenAwakeWanted = false;
+      wakeMessage = "Could not keep the screen awake. You can try again.";
+    }).finally(function () {
+      if (version !== wakeRequestVersion) return;
+      wakeRequestPending = false;
+      updateScreenAwakeControl();
+    });
+  }
+
+  function wireReadingControls() {
+    var settings = el("textSizeBtn");
+    if (settings) settings.addEventListener("click", showTextSizeDialog);
+    if (el("readerSmaller")) el("readerSmaller").addEventListener("click", function () { setTextSize(textSizeIndex - 1); });
+    if (el("readerLarger")) el("readerLarger").addEventListener("click", function () { setTextSize(textSizeIndex + 1); });
+    if (el("readerAwake")) el("readerAwake").addEventListener("click", function () {
+      if (screenAwakeWanted) stopKeepingScreenAwake();
+      else { screenAwakeWanted = true; requestScreenWakeLock(); }
+    });
+    updateTextSizeControls();
+    updateScreenAwakeControl();
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState !== "visible") releaseScreenWakeLock();
+    else requestScreenWakeLock();
+  });
+  window.addEventListener("pagehide", stopKeepingScreenAwake);
 
   // Announcements come from a Google Sheet (IAG.announcements). The block renders
   // immediately from cache/fallback, then loadAnnouncements() refreshes from the
@@ -663,7 +830,7 @@
 
   function renderSection(s) {
     var isArticle = s.layout === "article";
-    return '<div class="section' + (isArticle ? " section--article" : "") + '">' +
+    return '<div class="section' + (isArticle ? " section--article" : "") + '" data-section="' + esc(s.id) + '">' +
       (isArticle ? renderArticle(s.blocks) : renderBlocks(s.blocks)) + "</div>";
   }
 
@@ -686,7 +853,12 @@
         '<span class="row__text"><span class="row__label">' + esc(s.title) + "</span></span>" +
         svg("chevron", "row__chev") + "</a>";
     }).join("");
-    return '<div class="section"><div class="card card--list">' + installRow + rows + "</div></div>";
+    var textSizeRow = '<button class="row" id="textSizeBtn" type="button" aria-haspopup="dialog">' +
+      '<span class="row__ic text-size-mark" aria-hidden="true">Aa</span>' +
+      '<span class="row__text"><span class="row__label">Text size</span>' +
+      '<span class="row__sub" id="textSizeSummary">' + TEXT_SIZES[textSizeIndex].label + "</span></span>" +
+      svg("chevron", "row__chev") + "</button>";
+    return '<div class="section section--more"><div class="card card--list">' + textSizeRow + installRow + rows + "</div></div>";
   }
 
   /* ---- Top bar & tab bar ------------------------------------------------- */
@@ -722,6 +894,8 @@
   }
 
   function navigate() {
+    closeTextSizeDialog();
+    stopKeepingScreenAwake();
     var key = parseHash();
     var contentHTML, title, activeForTab;
 
@@ -755,6 +929,7 @@
 
   /* ---- Per-screen wiring (back, share, copy) ----------------------------- */
   function wireScreen() {
+    wireReadingControls();
     var back = el("backBtn");
     if (back) back.addEventListener("click", function () {
       if (history.length > 1) history.back(); else location.hash = "#/";
@@ -1017,9 +1192,26 @@
   function setupSW() {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("sw.js").catch(function () {});
+        // Always check the worker source online; applying it does not reload
+        // an open reading or save a member's reading position.
+        navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(function () {});
       });
     }
+  }
+
+  function setupUpdateNotice() {
+    var notice = el("updateNotice");
+    var email = IAG.meta.updatesEmail;
+    if (!notice || !email) return;
+    notice.innerHTML = '<p>For updates or changes, email ' +
+      '<a href="mailto:' + esc(email) + '">' + esc(email) + '</a>.</p>' +
+      '<button type="button" class="update-notice__close" aria-label="Dismiss updates notice">&times;</button>';
+    notice.hidden = false;
+    notice.querySelector("button").addEventListener("click", function () {
+      notice.hidden = true;
+      var next = el("topbar").querySelector("button, a");
+      if (next) next.focus();
+    });
   }
 
   /* ---- Boot -------------------------------------------------------------- */
@@ -1029,6 +1221,7 @@
   });
   document.addEventListener("DOMContentLoaded", function () {
     navigate();
+    setupUpdateNotice();
     setupInstall();
     setupSW();
   });

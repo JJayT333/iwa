@@ -46,13 +46,15 @@ row anywhere, add an item to a `links` block:
 > logic and the design.
 
 ### After you change a file
-Content edits now **update automatically** — phones load the cached copy
-instantly and quietly pull your changes in the background, showing them on the
-next open. You normally do **not** need to touch `sw.js`.
+Online opens and reloads fetch the current app code and content. If the connection
+is unavailable, the app uses the last successfully cached copy. An already open
+reading stays in place; reloading opens the new version.
 
-(Only if you ever want to *force* every phone to flush everything at once — e.g.
-after a big redesign — open **`sw.js`** and bump `CACHE_VERSION` to the next
-number, e.g. `"iag-v8"` → `"iag-v9"`.)
+For a release that changes the app shell or cached images/fonts, bump
+`CACHE_VERSION` in `sw.js` and keep the `?v=` values for CSS and JavaScript in
+`index.html` and the worker's `APP_SHELL` in sync. The versioned URLs let an old
+worker fetch the new code instead of serving its old copy. Normal content edits
+are fetched on the next online open without changing that version.
 
 ---
 
@@ -203,3 +205,66 @@ python3 -m http.server 8000
 Then open `http://localhost:8000`. (A local server is needed for the service
 worker; opening `index.html` directly with `file://` works for everything except
 offline caching.)
+
+
+## Reader and text size
+
+The opening notice directs updates or changes to `meta.updatesEmail` in
+`js/content.js`. Its X dismisses it until the page is reopened or reloaded;
+changing sections keeps it dismissed. The email address opens a mail draft.
+
+The Meeting Script is one continuous reading. Its A− / A+ controls and
+**More → Text size** share Standard, Large (125%), and Extra large (150%) sizes.
+Sizes last only while this page is open: reload returns to Standard. No reading
+positions, favorites, or text-size preferences are written to browser storage.
+Existing PDFs use their own viewer zoom controls.
+
+The optional **Keep screen awake** control uses the browser's Screen Wake Lock
+API on HTTPS (or localhost). It stops on leaving the script. If the app becomes
+hidden, the lock is released; returning to the visible script requests it again
+if the switch is still on. Unsupported browsers and denied requests show a
+message and leave the reader usable.
+
+## Verification
+
+On iOS Home Screen launches, the outer page uses viewport height to avoid a
+reported bottom gap with percentage heights and a translucent status bar.
+Browser tabs and non-iOS devices retain their existing sizing. Navigation
+keeps its safe-area padding. Confirm this workaround on a physical iPhone;
+desktop emulation cannot verify the iOS system-owned screen area.
+
+This is a static HTML/CSS/JavaScript app with no build system, package manifest,
+type checker, or configured lint, format, test, or security scanner commands.
+Run these available source checks from the project folder:
+
+```bash
+node --check js/app.js
+node --check js/content.js
+node --check sw.js
+git diff --check
+```
+
+For reader changes, verify in a real browser at phone, tablet, and desktop widths:
+continuous script wording; all three sizes across routes; no horizontal overflow;
+keyboard operation and focus containment in the size dialog; reset after reload;
+and screen-awake success, refusal, hidden-page, navigation, and unsupported states.
+Check both a fresh context and an upgrade from an older cache. Verify the
+continuous script survives an online reload and then an offline reload. In
+browser automation, ensure service workers are actually handling requests;
+bypassing them does not test updates or offline behavior.
+
+
+## Visual system
+
+The app uses Lora for headings and prayer readings, and Source Sans 3 for
+navigation, controls, and the spoken meeting script. Latin variable WOFF2 fonts
+are bundled under `assets/fonts/` and included in the offline app shell. Their
+SIL Open Font License notices and source URLs are in the same folder. The app
+no longer requests a remote font stylesheet.
+
+Shared color and type settings are at the top of `css/styles.css`: navy for
+navigation and headings, cool daylight surfaces for utility information, warm
+paper for readings, and sunrise gold for important actions and selection.
+Section styling uses `data-section` on the existing renderer; content and
+navigation order remain in `js/content.js`. When updating cached assets, bump
+the cache version in `sw.js`.
