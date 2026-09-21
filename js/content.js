@@ -71,6 +71,7 @@ window.IAG = {
     name:      "Into Action Group",
     shortName: "Into Action",
     tagline:   "One day at a time",
+    updatesEmail: "intoactionkingwood@gmail.com",
     // After you deploy, paste the public URL here so the Share button sends a
     // clean link. Leave "" to share whatever page is currently open.
     shareUrl:  "",
@@ -491,7 +492,7 @@ window.IAG = {
               body: "Good morning; welcome to the In2Action Group of Alcoholics Anonymous. My name is ______, and I am an alcoholic.\n\nWe are a group of alcoholics that desire not to drink by practicing the principles set forth under the Alcoholics Anonymous program of recovery." },
 
             { heading: "2 · The A.A. Preamble",
-              body: "Alcoholics Anonymous is a fellowship of men and women who share their experience, strength, and hope with each other that they may solve their common problem and help others to recover from alcoholism.\n\nThe only requirement for membership is a desire to stop drinking. There are no dues or fees for AA membership; we are self-supporting through our own contributions. AA is not allied with any sect, denomination, politics, organization or institution; does not wish to engage in any controversy, neither endorses nor opposes any causes. Our primary purpose is to stay sober and help other alcoholics to achieve sobriety.\n\n© A.A. Grapevine, Inc.; reprinted with permission." },
+              body: "Alcoholics Anonymous is a fellowship of men and women who share their experience, strength, and hope with each other that they may solve their common problem and help others to recover from alcoholism.\n\nThe only requirement for membership is a desire to stop drinking. There are no dues or fees for AA membership; we are self-supporting through our own contributions. AA is not allied with any sect, denomination, politics, organization or institution; does not wish to engage in any controversy, neither endorses nor opposes any causes. Our primary purpose is to stay sober and help other alcoholics to achieve sobriety." },
 
             { heading: "3 · Moment of Silence & Serenity Prayer",
               body: "Let's have a moment of silence followed by the Serenity Prayer." },

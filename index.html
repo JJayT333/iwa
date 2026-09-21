@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Into Action Group</title>
   <meta name="description" content="Into Action Group — meeting info, schedule, prayers, and resources. One day at a time.">
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0B1E36">
+  <meta name="theme-color" content="#12354A">
 
   <!-- iOS standalone -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,23 +22,23 @@
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
   <link rel="icon" href="icons/favicon.ico" sizes="any">
 
-  <!-- Display font (progressive: falls back to Georgia offline) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <!-- Local fonts keep the same appearance offline. -->
+  <link rel="preload" href="assets/fonts/lora-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/source-sans-3-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
 
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=27">
 </head>
 <body>
   <div id="app">
     <div id="topbar"></div>
+    <aside id="updateNotice" aria-label="App updates and changes" hidden></aside>
     <main id="content"></main>
     <nav id="tabbar"></nav>
     <div id="banner"></div>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/content.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/content.js?v=27"></script>
+  <script src="js/app.js?v=27"></script>
 </body>
 </html>
