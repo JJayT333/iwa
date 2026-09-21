@@ -46,15 +46,24 @@ row anywhere, add an item to a `links` block:
 > logic and the design.
 
 ### After you change a file
-Online opens and reloads fetch the current app code and content. If the connection
-is unavailable, the app uses the last successfully cached copy. An already open
-reading stays in place; reloading opens the new version.
+Every deploy should bump the cache version so installed home-screen apps pick
+up the new files on their next open. Run the release helper with the next
+number (it edits `CACHE_VERSION` in `sw.js` and the `?v=` URLs in `index.html`
+and `sw.js`, checks syntax, stages the site, and writes a zip):
 
-For a release that changes the app shell or cached images/fonts, bump
-`CACHE_VERSION` in `sw.js` and keep the `?v=` values for CSS and JavaScript in
-`index.html` and the worker's `APP_SHELL` in sync. The versioned URLs let an old
-worker fetch the new code instead of serving its old copy. Normal content edits
-are fetched on the next online open without changing that version.
+```bash
+scripts/release.sh 29
+```
+
+Add `--deploy` to publish straight to Netlify production (needs the Netlify CLI
+and a linked site). Or drag the zip from `output/releases/` onto Netlify.
+
+How updates reach phones: `sw.js`, `index.html`, and the manifest are served
+with `Cache-Control: no-cache` (see `_headers`). The app checks for a new
+worker every time it is opened or resumed; a new worker installs, takes over
+immediately, deletes old caches, and the page reloads once. Page, CSS, and
+JavaScript are network-first with an offline fallback; images, fonts, and icons
+are cache-first with a background refresh.
 
 ---
 
