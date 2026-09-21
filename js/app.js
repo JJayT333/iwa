@@ -1190,13 +1190,39 @@
 
   /* ---- Service worker ---------------------------------------------------- */
   function setupSW() {
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function () {
-        // Always check the worker source online; applying it does not reload
-        // an open reading or save a member's reading position.
-        navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(function () {});
-      });
-    }
+    if (!("serviceWorker" in navigator)) return;
+
+    // Reload once when a new worker takes control so the open page runs the
+    // new version. Skipped on the very first install (no previous controller)
+    // and guarded against loops.
+    var hadController = !!navigator.serviceWorker.controller;
+    var reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      // The first claim after a fresh install is not an update: remember it only.
+      if (!hadController) { hadController = true; return; }
+      if (reloaded) return;
+      reloaded = true;
+      window.location.reload();
+    });
+
+    window.addEventListener("load", function () {
+      // updateViaCache: "none" always checks the worker source on the network.
+      navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
+        // Check for a new version every time the app is opened or resumed.
+        document.addEventListener("visibilitychange", function () {
+          if (document.visibilityState === "visible") reg.update().catch(function () {});
+        });
+        // If a new worker is already waiting (older browsers), activate it now.
+        if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+        reg.addEventListener("updatefound", function () {
+          var sw = reg.installing;
+          if (!sw) return;
+          sw.addEventListener("statechange", function () {
+            if (sw.state === "installed" && reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+          });
+        });
+      }).catch(function () {});
+    });
   }
 
   function setupUpdateNotice() {
