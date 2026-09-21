@@ -13,3 +13,6 @@ output/
 
 # Local Netlify CLI install (node_modules only)
 .netlify-tools/
+
+# Local Netlify folder
+.netlify
